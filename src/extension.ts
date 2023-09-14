@@ -1,29 +1,49 @@
 import * as vscode from 'vscode';
-import { readNpmScripts } from './read-npm-scripts';
+import { readNxProjectTargets } from './read-nx-project-targets';
+import { readNxProjects } from './read-nx-projects';
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand(
-        'elltg-npm-script-run.runNpmScript',
+        'elltg-nx-script-run.runNxScript',
         async () => {
-            const namedNpmScripts = await readNpmScripts();
+            /**
+             * step 1: read the projects and allow picking of a project
+             *
+             * step 2: read the targets for that project and allow picking
+             */
 
-            const selectedNpmScript = await vscode.window.showQuickPick(namedNpmScripts);
+            let nxProjects: string[];
+            try {
+                nxProjects = await readNxProjects();
+            } catch (err) {
+                vscode.window.showInformationMessage(`Failed to read nx projects. ${err}`);
+                return;
+            }
 
-            if (!selectedNpmScript) {
+            const selectedNxProject = await vscode.window.showQuickPick(nxProjects);
+
+            if (!selectedNxProject) {
                 vscode.window.showInformationMessage(
-                    'You did not select an npm script. Exiting...'
+                    'You did not select an nx project. Exiting...'
                 );
                 return;
             }
 
-            // vscode.window.showInformationMessage(
-            //     `Running selected npm script: [${selectedNpmScript}]`
-            // );
+            const nxProjectTargets = await readNxProjectTargets(selectedNxProject);
+
+            const selectedTarget = await vscode.window.showQuickPick(nxProjectTargets);
+
+            if (!selectedTarget) {
+                vscode.window.showInformationMessage(
+                    'You did not select an nx project target. Exiting...'
+                );
+                return;
+            }
 
             const activeTerminal = vscode.window.activeTerminal;
             if (activeTerminal) {
                 activeTerminal.show();
-                activeTerminal.sendText(`npm run ${selectedNpmScript}`);
+                activeTerminal.sendText(`npx nx run ${selectedNxProject}:${selectedTarget}`);
             } else {
                 vscode.window.showInformationMessage('No active terminal. Exiting...');
             }
