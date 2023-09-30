@@ -43,7 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
             const activeTerminal = vscode.window.activeTerminal;
             if (activeTerminal) {
                 activeTerminal.show();
-                activeTerminal.sendText(`npx nx run ${selectedNxProject}:${selectedTarget}`);
+                activeTerminal.sendText(`nx run ${selectedNxProject}:${selectedTarget}`);
             } else {
                 vscode.window.showInformationMessage('No active terminal. Exiting...');
             }

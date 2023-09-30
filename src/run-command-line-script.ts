@@ -19,7 +19,7 @@ export function runCommandLineScript(script: string): Promise<string> {
 
         exec(script, config, (error, stdout, stderr) => {
             if (error) {
-                reject(stdout);
+                reject(error.message);
                 return;
             }
 
