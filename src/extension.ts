@@ -1,10 +1,8 @@
 import * as vscode from 'vscode';
-import { readNxProjectTargets } from './read-nx-project-targets';
-import { readNxProjects } from './read-nx-projects';
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand(
-        'elltg-nx-script-run.runNxScript',
+        'elltg-right-click-to-angular-component.extractToComponent',
         async () => {
             /**
              * step 1: read the projects and allow picking of a project
@@ -12,41 +10,71 @@ export function activate(context: vscode.ExtensionContext) {
              * step 2: read the targets for that project and allow picking
              */
 
-            let nxProjects: string[];
-            try {
-                nxProjects = await readNxProjects();
-            } catch (err) {
-                vscode.window.showInformationMessage(`Failed to read nx projects. ${err}`);
+            const editor = vscode.window.activeTextEditor;
+
+            if (!editor) {
+                vscode.window.showInformationMessage('No active editor. Exiting...');
                 return;
             }
 
-            const selectedNxProject = await vscode.window.showQuickPick(nxProjects);
-
-            if (!selectedNxProject) {
-                vscode.window.showInformationMessage(
-                    'You did not select an nx project. Exiting...'
-                );
+            if (!editor.selection) {
+                vscode.window.showInformationMessage('No active selection. Exiting...');
                 return;
             }
 
-            const nxProjectTargets = await readNxProjectTargets(selectedNxProject);
+            // get the selected text from the active editor
+            const selectedText = editor.document.getText(editor.selection);
 
-            const selectedTarget = await vscode.window.showQuickPick(nxProjectTargets);
+            // ask user for a name for new component
 
-            if (!selectedTarget) {
-                vscode.window.showInformationMessage(
-                    'You did not select an nx project target. Exiting...'
-                );
-                return;
-            }
+            // ask user for folder to create the component under
 
-            const activeTerminal = vscode.window.activeTerminal;
-            if (activeTerminal) {
-                activeTerminal.show();
-                activeTerminal.sendText(`nx run ${selectedNxProject}:${selectedTarget}`);
-            } else {
-                vscode.window.showInformationMessage('No active terminal. Exiting...');
-            }
+            // invoke the ng cli to create the component
+
+            // replace the html file content with the selection
+
+            // remove the selected text
+            await editor.edit((editBuilder) => {
+                editBuilder.delete(editor.selection);
+            });
+
+            vscode.window.showInformationMessage('Extension not complete. Exiting...');
+
+            // let nxProjects: string[];
+            // try {
+            //     nxProjects = await readNxProjects();
+            // } catch (err) {
+            //     vscode.window.showInformationMessage(`Failed to read nx projects. ${err}`);
+            //     return;
+            // }
+
+            // const selectedNxProject = await vscode.window.showQuickPick(nxProjects);
+
+            // if (!selectedNxProject) {
+            //     vscode.window.showInformationMessage(
+            //         'You did not select an nx project. Exiting...'
+            //     );
+            //     return;
+            // }
+
+            // const nxProjectTargets = await readNxProjectTargets(selectedNxProject);
+
+            // const selectedTarget = await vscode.window.showQuickPick(nxProjectTargets);
+
+            // if (!selectedTarget) {
+            //     vscode.window.showInformationMessage(
+            //         'You did not select an nx project target. Exiting...'
+            //     );
+            //     return;
+            // }
+
+            // const activeTerminal = vscode.window.activeTerminal;
+            // if (activeTerminal) {
+            //     activeTerminal.show();
+            //     activeTerminal.sendText(`nx run ${selectedNxProject}:${selectedTarget}`);
+            // } else {
+            //     vscode.window.showInformationMessage('No active terminal. Exiting...');
+            // }
         }
     );
 

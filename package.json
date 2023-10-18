@@ -1,12 +1,12 @@
 {
-    "name": "elltg-nx-script-run",
-    "displayName": "Command Palette NX Script Runner",
-    "description": "Run NX scripts from the command palette",
+    "name": "elltg-right-click-to-angular-component",
+    "displayName": "Right click to component (Angular: ng generate)",
+    "description": "Select chunk of DOM and extract it to a new angular component.",
     "publisher": "elltg",
-    "version": "1.0.2",
+    "version": "1.0.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/elliotjharper/vscode-nx-script-run.git"
+        "url": "https://github.com/elliotjharper/vscode-right-click-to-component.git"
     },
     "engines": {
         "vscode": "^1.71.0"
@@ -14,15 +14,21 @@
     "categories": [
         "Other"
     ],
-    "activationEvents": [
-        "onCommand:elltg-nx-script-run.runNxScript"
-    ],
     "main": "./dist/extension.js",
     "contributes": {
+        "menus": {
+            "editor/context": [
+                {
+                    "command": "elltg-right-click-to-angular-component.extractToComponent",
+                    "when": "resourceLangId == html && editorHasSelection",
+                    "group": "9_cutcopypaste"
+                }
+            ]
+        },
         "commands": [
             {
-                "command": "elltg-nx-script-run.runNxScript",
-                "title": "Run NX Script From /package.json"
+                "command": "elltg-right-click-to-angular-component.extractToComponent",
+                "title": "Cut as Angular component"
             }
         ]
     },
