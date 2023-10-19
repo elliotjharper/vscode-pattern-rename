@@ -1,17 +1,16 @@
 ## Features
 
-This extension lets you run NX scripts from the command palette.
-
-Run the extension from the command palette and it will list the projects from your nx monorepo.
-
-Upon selecting a project it will then list the targets for that project.
-
-When you have selected a project and a target, it will focus the last used terminal and send the text `npx nx run ${PROJECT} ${TARGET}` which will of course result in that script being run.
-
-NOTE: demo is from my other extension from which i forked. Need to create a new demo....
+This extension lets you easily construct a new angular component out of a chunk of a .html file.
+- Select the text that you want to extract (must be in a .html file).
+- Right click and the context menu will include the option "Cut as Angular component"
+- The extension will then ask you for the name for your new component. 
+    - (This name will be passed to `ng g c` so must not have any spaces)
+- Then you must select the folder you want the new component to be created in. You select the folder with a file browser dialog. 
+    - (No need to figure out the full path for your nested components, you just select the folder!)
+- The extension will then invoke the ng cli for you creating the new component, it will remove the selection from the existing component and then open up the new component in an editor for you inserting the selection that you wanted to extract.
 
 _Demo:_
-<img src="https://raw.githubusercontent.com/elliotjharper/vscode-npm-script-run/main/images/demo.gif" alt="demo">
+TODO...
 
 ## Requirements
 
