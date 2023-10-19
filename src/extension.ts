@@ -1,15 +1,10 @@
 import * as vscode from 'vscode';
+import { runCommandLineScript } from './run-command-line-script';
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand(
         'elltg-right-click-to-angular-component.extractToComponent',
         async () => {
-            /**
-             * step 1: read the projects and allow picking of a project
-             *
-             * step 2: read the targets for that project and allow picking
-             */
-
             const editor = vscode.window.activeTextEditor;
 
             if (!editor) {
@@ -22,59 +17,97 @@ export function activate(context: vscode.ExtensionContext) {
                 return;
             }
 
+            // capture the current selection
+            const selectionAtActivation = editor.selection;
+
             // get the selected text from the active editor
-            const selectedText = editor.document.getText(editor.selection);
+            const selectedText = editor.document.getText(selectionAtActivation);
 
             // ask user for a name for new component
+            const componentName = await vscode.window.showInputBox({
+                placeHolder: 'Type the name to be used for the new component (no spaces)',
+                validateInput: (userValue): string | undefined => {
+                    if (!userValue) {
+                        return 'Component name required';
+                    }
+
+                    if (userValue.includes(' ')) {
+                        return 'Component name cannot include spaces';
+                    }
+                },
+            });
+            if (!componentName) {
+                vscode.window.showInformationMessage('No component name provided. Exiting...');
+                return;
+            }
 
             // ask user for folder to create the component under
+            const folderSelection = await vscode.window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+            });
+            const targetFolder = folderSelection?.[0]?.fsPath;
+            if (!targetFolder) {
+                vscode.window.showInformationMessage('No targetFolder provided. Exiting...');
+                return;
+            }
 
-            // invoke the ng cli to create the component
+            const workspaceRootPath = vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath;
 
-            // replace the html file content with the selection
+            if (!workspaceRootPath) {
+                vscode.window.showInformationMessage(
+                    'Could not determine workspace folder. Exiting...'
+                );
+                return;
+            }
+
+            const selectedFolderWithinWorkspace = targetFolder.includes(workspaceRootPath);
+            if (!selectedFolderWithinWorkspace) {
+                vscode.window.showInformationMessage(
+                    'Selected folder was not within the workspace. Seems like a bad selection? Aborting for safety! Exiting...'
+                );
+                return;
+            }
+
+            // create the desired component
+            vscode.window.showInformationMessage('Scaffolding new component...');
+            try {
+                await runCommandLineScript(targetFolder, `ng generate component ${componentName}`);
+            } catch (err) {
+                vscode.window.showInformationMessage(
+                    `ERROR: Failed to generate new component. ${err}`
+                );
+                return;
+            }
 
             // remove the selected text
             await editor.edit((editBuilder) => {
-                editBuilder.delete(editor.selection);
+                editBuilder.delete(selectionAtActivation);
             });
 
-            vscode.window.showInformationMessage('Extension not complete. Exiting...');
+            // open the newly generated component in an editor
+            // replace the content with the selection
+            const newComponentTemplatePath = vscode.Uri.file(
+                `${targetFolder}\\${componentName}\\${componentName}.component.html`
+            );
+            const newComponentEditor = await vscode.window.showTextDocument(
+                newComponentTemplatePath
+            );
 
-            // let nxProjects: string[];
-            // try {
-            //     nxProjects = await readNxProjects();
-            // } catch (err) {
-            //     vscode.window.showInformationMessage(`Failed to read nx projects. ${err}`);
-            //     return;
-            // }
+            await newComponentEditor.edit((editBuilder) => {
+                const entireFileRange = new vscode.Range(
+                    0,
+                    0,
+                    newComponentEditor.document.lineCount,
+                    0
+                );
+                editBuilder.replace(entireFileRange, selectedText);
+            });
 
-            // const selectedNxProject = await vscode.window.showQuickPick(nxProjects);
-
-            // if (!selectedNxProject) {
-            //     vscode.window.showInformationMessage(
-            //         'You did not select an nx project. Exiting...'
-            //     );
-            //     return;
-            // }
-
-            // const nxProjectTargets = await readNxProjectTargets(selectedNxProject);
-
-            // const selectedTarget = await vscode.window.showQuickPick(nxProjectTargets);
-
-            // if (!selectedTarget) {
-            //     vscode.window.showInformationMessage(
-            //         'You did not select an nx project target. Exiting...'
-            //     );
-            //     return;
-            // }
-
-            // const activeTerminal = vscode.window.activeTerminal;
-            // if (activeTerminal) {
-            //     activeTerminal.show();
-            //     activeTerminal.sendText(`nx run ${selectedNxProject}:${selectedTarget}`);
-            // } else {
-            //     vscode.window.showInformationMessage('No active terminal. Exiting...');
-            // }
+            vscode.window.showInformationMessage(
+                'Finished creating new component with selected content. Exiting...'
+            );
         }
     );
 
