@@ -88,16 +88,17 @@ async function scaffoldNewComponent(
 ): Promise<void> {
     // create the desired component
     vscode.window.showInformationMessage('Scaffolding new component...');
-    try {
-        let generateComponentCommand = `ng generate component ${componentName} --skip-tests`;
-        if (skipModuleImport) {
-            generateComponentCommand += `${generateComponentCommand} --skip-import`;
-        }
-        await runCommandLineScript(targetFolder, generateComponentCommand);
-    } catch (err) {
-        vscode.window.showInformationMessage(`ERROR: Failed to generate new component. ${err}`);
-        return;
+
+    let generateComponentCommand = `ng generate component ${componentName} --skip-tests`;
+    if (skipModuleImport) {
+        generateComponentCommand += ` --skip-import`;
     }
+    await runCommandLineScript(targetFolder, generateComponentCommand);
+}
+
+/** IMPORTANT: This will apply to whatever is the active editor  */
+async function triggerFormatDocument(): Promise<void> {
+    await vscode.commands.executeCommand('editor.action.formatDocument');
 }
 
 async function replaceSelectionWithNewComponent(
@@ -114,8 +115,7 @@ async function replaceSelectionWithNewComponent(
         );
     });
 
-    // TODO: format the document after making the change
-    // ??????
+    await triggerFormatDocument();
 }
 
 async function populateNewComponentWithSelection(
@@ -134,8 +134,8 @@ async function populateNewComponentWithSelection(
         const entireFileRange = new vscode.Range(0, 0, newComponentEditor.document.lineCount, 0);
         editBuilder.replace(entireFileRange, initialSelectedText);
     });
-    // TODO: format the document after making the change
-    // ??????
+
+    await triggerFormatDocument();
 }
 
 async function extractComponentMain(skipModuleImport: boolean): Promise<void> {
