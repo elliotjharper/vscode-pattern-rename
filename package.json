@@ -3,7 +3,7 @@
     "displayName": "Right click to component (Angular: ng generate)",
     "description": "Select chunk of DOM and extract it to a new angular component.",
     "publisher": "elltg",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "repository": {
         "type": "git",
         "url": "https://github.com/elliotjharper/vscode-right-click-to-component.git"
