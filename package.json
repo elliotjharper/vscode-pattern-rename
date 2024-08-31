@@ -1,12 +1,12 @@
 {
-    "name": "elltg-right-click-to-angular-component",
-    "displayName": "Right click to component (Angular: ng generate)",
-    "description": "Select chunk of DOM and extract it to a new angular component.",
+    "name": "elltg-right-click-to-extract-typescript",
+    "displayName": "Right click to extract typescript",
+    "description": "Select chunk of typescript and extract it to a new .ts file",
     "publisher": "elltg",
-    "version": "1.0.6",
+    "version": "1.0.1",
     "repository": {
         "type": "git",
-        "url": "https://github.com/elliotjharper/vscode-right-click-to-component.git"
+        "url": "https://github.com/elliotjharper/vscode-right-click-to-extract-function.git"
     },
     "engines": {
         "vscode": "^1.71.0"
@@ -15,23 +15,23 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:elltg-right-click-to-angular-component.extractToComponent"
+        "onCommand:elltg-right-click-to-extract-typescript.extractTypescript"
     ],
     "main": "./dist/extension.js",
     "contributes": {
         "menus": {
             "editor/context": [
                 {
-                    "command": "elltg-right-click-to-angular-component.extractToComponent",
-                    "when": "resourceLangId == html && editorHasSelection",
+                    "command": "elltg-right-click-to-extract-typescript.extractTypescript",
+                    "when": "resourceLangId == typescript && editorHasSelection",
                     "group": "9_cutcopypaste"
                 }
             ]
         },
         "commands": [
             {
-                "command": "elltg-right-click-to-angular-component.extractToComponent",
-                "title": "Extract as Angular component"
+                "command": "elltg-right-click-to-extract-typescript.extractTypescript",
+                "title": "Extract to new .ts file"
             }
         ]
     },

@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { askForTargetFolder } from './workspace-utils';
 import {
     activeEditor,
     getUserSelectedText,
@@ -9,126 +8,85 @@ import {
     triggerFormatDocument,
 } from './editor-utils';
 import { writeFileAtPath } from './file-utils';
-import { isCharacterUppercase, kebabToPascalCase, pascalToKebabCase } from './string.utils';
+import { dirname } from 'path';
 
-async function askForComponentName(initialEditor: vscode.TextEditor): Promise<string> {
+async function askForTypescriptName(initialEditor: vscode.TextEditor): Promise<string> {
     if (!initialEditor.selection) {
         throw new Error('No active selection. Exiting...');
     }
 
     // ask user for a name for new component
-    let componentName = await vscode.window.showInputBox({
-        placeHolder: 'Type the new component ClassName. For example "MyNewComponent"',
+    let typescriptFileName = await vscode.window.showInputBox({
+        placeHolder: 'Type the new typescript file name (.ts is optional)',
         validateInput: (userValue): string | undefined => {
             if (!userValue) {
-                return 'Component class name required';
+                return 'Typescript file name required';
             }
 
-            if (userValue.includes(' ')) {
-                return 'Component class name cannot include spaces';
-            }
-
-            if (userValue.includes('-')) {
-                return 'Component class name cannot include hyphens';
-            }
-
-            if (!isCharacterUppercase(userValue[0])) {
-                return 'Component class name should be PascalCase';
+            if (userValue.endsWith('.')) {
+                return 'Typescript file name shouldnt end with .';
             }
         },
     });
-    if (!componentName) {
-        throw new Error('No component name provided. Exiting...');
+    if (!typescriptFileName) {
+        throw new Error('No Typescript file name provided. Exiting...');
     }
 
-    return pascalToKebabCase(componentName);
+    if (!typescriptFileName.toLowerCase().endsWith('.ts')) {
+        typescriptFileName += '.ts';
+    }
+
+    return typescriptFileName;
 }
 
-async function replaceSelectionWithNewComponent(
-    initialEditor: vscode.TextEditor,
-    componentName: string,
-    initialSelection: vscode.Selection
+async function createNewTypescriptFileAndOpen(
+    targetFileFolder: string,
+    targetFileName: string,
+    targetFileContent: string
 ): Promise<void> {
-    const newComponentSelector = `app-${componentName}`;
-    const newComponentUsage = `<${newComponentSelector}></${newComponentSelector}>`;
-    await replaceSelectionInEditor(initialEditor, initialSelection, newComponentUsage);
-    await triggerFormatDocument();
-}
-
-const componentClassTemplate = `import { Component } from '@angular/core';
-
-@Component({
-    selector: '{Selector}',
-    templateUrl: '{TemplatePath}'
-})
-export class {ClassName} {}
-`;
-
-function buildComponentClass(selector: string, templatePath: string, className: string): string {
-    let file = componentClassTemplate;
-
-    file = file.replace('{Selector}', selector);
-    file = file.replace('{TemplatePath}', templatePath);
-    file = file.replace('{ClassName}', className);
-
-    return file;
-}
-
-async function createNewComponentWithSelectionAndOpen(
-    targetFolder: string,
-    componentName: string,
-    selectedTemplateText: string
-): Promise<void> {
-    vscode.window.showInformationMessage('Creating new component...');
+    vscode.window.showInformationMessage('Creating new typescript file...');
 
     // write a new template file with the selection
-    const templateFilePath = `${targetFolder}\\${componentName}\\${componentName}.component.html`;
-    await writeFileAtPath(templateFilePath, selectedTemplateText);
-    await openFileInNewEditor(templateFilePath);
-
-    // write the component class file
-    const componentFilePath = `${targetFolder}\\${componentName}\\${componentName}.component.ts`;
-    const newComponentClass = buildComponentClass(
-        `app-${componentName}`,
-        `${componentName}.component.html`,
-        kebabToPascalCase(componentName)
-    );
-    await writeFileAtPath(componentFilePath, newComponentClass);
-    await openFileInNewEditor(componentFilePath);
+    const newPath = `${targetFileFolder}/${targetFileName}`;
+    await writeFileAtPath(newPath, targetFileContent);
+    await openFileInNewEditor(newPath);
     await triggerFormatDocument();
 }
 
-async function extractComponentMain(): Promise<void> {
+async function extractTypescriptMain(): Promise<void> {
     try {
         const initialEditor = activeEditor();
         const initialSelection = getUserSelection();
         const selectedTemplateText = getUserSelectedText();
+        const initialEditorFilePath = initialEditor.document.fileName;
+        const initialEditorFileFolder = dirname(initialEditorFilePath);
 
-        const componentName: string = await askForComponentName(initialEditor);
+        const newTypescriptFileName: string = await askForTypescriptName(initialEditor);
 
-        const targetFolder: string = await askForTargetFolder();
+        // remove selection from the original file
+        await replaceSelectionInEditor(initialEditor, initialSelection, '');
+        // reformat the original file now content was removed
+        await triggerFormatDocument();
 
-        await replaceSelectionWithNewComponent(initialEditor, componentName, initialSelection);
-
-        await createNewComponentWithSelectionAndOpen(
-            targetFolder,
-            componentName,
+        await createNewTypescriptFileAndOpen(
+            initialEditorFileFolder,
+            newTypescriptFileName,
             selectedTemplateText
         );
 
         vscode.window.showInformationMessage(
-            'Finished creating new component with selected content. Exiting...'
+            'Finished creating new typescript file with selected content. Exiting...'
         );
     } catch (err) {
-        vscode.window.showInformationMessage(`Error whilst extracting component: ${err}`);
+        vscode.window.showInformationMessage(`Error whilst extracting typescript: ${err}`);
     }
 }
 
 export function activate(context: vscode.ExtensionContext) {
     let extractToComponentCommand = vscode.commands.registerCommand(
-        'elltg-right-click-to-angular-component.extractToComponent',
+        'elltg-right-click-to-extract-typescript.extractTypescript',
         async () => {
-            extractComponentMain();
+            extractTypescriptMain();
         }
     );
     context.subscriptions.push(extractToComponentCommand);
