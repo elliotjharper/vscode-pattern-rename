@@ -3,7 +3,7 @@
     "displayName": "Right click to component (Angular: ng generate)",
     "description": "Select chunk of DOM and extract it to a new angular component.",
     "publisher": "elltg",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "repository": {
         "type": "git",
         "url": "https://github.com/elliotjharper/vscode-right-click-to-component.git"
@@ -15,8 +15,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:elltg-right-click-to-angular-component.extractToComponent",
-        "onCommand:elltg-right-click-to-angular-component.extractToComponentSkipModuleImport"
+        "onCommand:elltg-right-click-to-angular-component.extractToComponent"
     ],
     "main": "./dist/extension.js",
     "contributes": {
@@ -26,11 +25,6 @@
                     "command": "elltg-right-click-to-angular-component.extractToComponent",
                     "when": "resourceLangId == html && editorHasSelection",
                     "group": "9_cutcopypaste"
-                },
-                {
-                    "command": "elltg-right-click-to-angular-component.extractToComponentSkipModuleImport",
-                    "when": "resourceLangId == html && editorHasSelection",
-                    "group": "9_cutcopypaste"
                 }
             ]
         },
@@ -38,10 +32,6 @@
             {
                 "command": "elltg-right-click-to-angular-component.extractToComponent",
                 "title": "Extract as Angular component"
-            },
-            {
-                "command": "elltg-right-click-to-angular-component.extractToComponentSkipModuleImport",
-                "title": "Extract as Angular component (Skip Module Import)"
             }
         ]
     },

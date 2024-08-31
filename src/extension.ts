@@ -1,26 +1,15 @@
 import * as vscode from 'vscode';
-import { runCommandLineScript } from './run-command-line-script';
-import { toKebabCase } from './to-kebab-case';
-
-function activeEditor(): vscode.TextEditor {
-    const editor = vscode.window.activeTextEditor;
-
-    if (!editor) {
-        throw new Error('No active editor. Exiting...');
-    }
-
-    return editor;
-}
-
-function getUserSelection(): vscode.Selection {
-    return activeEditor().selection;
-}
-
-function getUserSelectedText(): string {
-    const selectedText = activeEditor().document.getText(getUserSelection());
-
-    return selectedText;
-}
+import { askForTargetFolder } from './workspace-utils';
+import {
+    activeEditor,
+    getUserSelectedText,
+    getUserSelection,
+    openFileInNewEditor,
+    replaceSelectionInEditor,
+    triggerFormatDocument,
+} from './editor-utils';
+import { writeFileAtPath } from './file-utils';
+import { isCharacterUppercase, kebabToPascalCase, pascalToKebabCase } from './string.utils';
 
 async function askForComponentName(initialEditor: vscode.TextEditor): Promise<string> {
     if (!initialEditor.selection) {
@@ -29,14 +18,22 @@ async function askForComponentName(initialEditor: vscode.TextEditor): Promise<st
 
     // ask user for a name for new component
     let componentName = await vscode.window.showInputBox({
-        placeHolder: 'Type the name to be used for the new component (no spaces)',
+        placeHolder: 'Type the new component ClassName. For example "MyNewComponent"',
         validateInput: (userValue): string | undefined => {
             if (!userValue) {
-                return 'Component name required';
+                return 'Component class name required';
             }
 
             if (userValue.includes(' ')) {
-                return 'Component name cannot include spaces';
+                return 'Component class name cannot include spaces';
+            }
+
+            if (userValue.includes('-')) {
+                return 'Component class name cannot include hyphens';
+            }
+
+            if (!isCharacterUppercase(userValue[0])) {
+                return 'Component class name should be PascalCase';
             }
         },
     });
@@ -44,61 +41,7 @@ async function askForComponentName(initialEditor: vscode.TextEditor): Promise<st
         throw new Error('No component name provided. Exiting...');
     }
 
-    return toKebabCase(componentName);
-}
-
-function getWorkspaceRootPath(): string {
-    const workspaceRootPath = vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath;
-
-    if (!workspaceRootPath) {
-        throw new Error('Could not determine workspace folder. Exiting...');
-    }
-
-    return workspaceRootPath;
-}
-
-async function askForTargetFolder(): Promise<string> {
-    // ask user for folder to create the component under
-    const folderSelection = await vscode.window.showOpenDialog({
-        canSelectFiles: false,
-        canSelectFolders: true,
-        canSelectMany: false,
-    });
-
-    const targetFolder = folderSelection?.[0]?.fsPath;
-
-    if (!targetFolder) {
-        throw new Error('No targetFolder provided. Exiting...');
-    }
-
-    const selectedFolderWithinWorkspace = targetFolder.includes(getWorkspaceRootPath());
-    if (!selectedFolderWithinWorkspace) {
-        throw new Error(
-            'Selected folder was not within the workspace. Seems like a bad selection? Aborting for safety! Exiting...'
-        );
-    }
-
-    return targetFolder;
-}
-
-async function scaffoldNewComponent(
-    componentName: string,
-    targetFolder: string,
-    skipModuleImport: boolean
-): Promise<void> {
-    // create the desired component
-    vscode.window.showInformationMessage('Scaffolding new component...');
-
-    let generateComponentCommand = `ng generate component ${componentName} --skip-tests`;
-    if (skipModuleImport) {
-        generateComponentCommand += ` --skip-import`;
-    }
-    await runCommandLineScript(targetFolder, generateComponentCommand);
-}
-
-/** IMPORTANT: This will apply to whatever is the active editor  */
-async function triggerFormatDocument(): Promise<void> {
-    await vscode.commands.executeCommand('editor.action.formatDocument');
+    return pascalToKebabCase(componentName);
 }
 
 async function replaceSelectionWithNewComponent(
@@ -106,53 +49,72 @@ async function replaceSelectionWithNewComponent(
     componentName: string,
     initialSelection: vscode.Selection
 ): Promise<void> {
-    await initialEditor.edit((editBuilder) => {
-        const newComponentSelector = `app-${componentName}`;
-
-        editBuilder.replace(
-            initialSelection,
-            `<${newComponentSelector}></${newComponentSelector}>`
-        );
-    });
-
+    const newComponentSelector = `app-${componentName}`;
+    const newComponentUsage = `<${newComponentSelector}></${newComponentSelector}>`;
+    await replaceSelectionInEditor(initialEditor, initialSelection, newComponentUsage);
     await triggerFormatDocument();
 }
 
-async function populateNewComponentWithSelection(
+const componentClassTemplate = `import { Component } from '@angular/core';
+
+@Component({
+    selector: '{Selector}',
+    templateUrl: '{TemplatePath}'
+})
+export class {ClassName} {}
+`;
+
+function buildComponentClass(selector: string, templatePath: string, className: string): string {
+    let file = componentClassTemplate;
+
+    file = file.replace('{Selector}', selector);
+    file = file.replace('{TemplatePath}', templatePath);
+    file = file.replace('{ClassName}', className);
+
+    return file;
+}
+
+async function createNewComponentWithSelectionAndOpen(
     targetFolder: string,
     componentName: string,
-    initialSelectedText: string
+    selectedTemplateText: string
 ): Promise<void> {
-    // open the newly generated component in an editor
-    // replace the content with the selection
-    const newComponentTemplatePath = vscode.Uri.file(
-        `${targetFolder}\\${componentName}\\${componentName}.component.html`
+    vscode.window.showInformationMessage('Creating new component...');
+
+    // write a new template file with the selection
+    const templateFilePath = `${targetFolder}\\${componentName}\\${componentName}.component.html`;
+    await writeFileAtPath(templateFilePath, selectedTemplateText);
+    await openFileInNewEditor(templateFilePath);
+
+    // write the component class file
+    const componentFilePath = `${targetFolder}\\${componentName}\\${componentName}.component.ts`;
+    const newComponentClass = buildComponentClass(
+        `app-${componentName}`,
+        `${componentName}.component.html`,
+        kebabToPascalCase(componentName)
     );
-    const newComponentEditor = await vscode.window.showTextDocument(newComponentTemplatePath);
-
-    await newComponentEditor.edit((editBuilder) => {
-        const entireFileRange = new vscode.Range(0, 0, newComponentEditor.document.lineCount, 0);
-        editBuilder.replace(entireFileRange, initialSelectedText);
-    });
-
+    await writeFileAtPath(componentFilePath, newComponentClass);
+    await openFileInNewEditor(componentFilePath);
     await triggerFormatDocument();
 }
 
-async function extractComponentMain(skipModuleImport: boolean): Promise<void> {
+async function extractComponentMain(): Promise<void> {
     try {
         const initialEditor = activeEditor();
         const initialSelection = getUserSelection();
-        const initialSelectedText = getUserSelectedText();
+        const selectedTemplateText = getUserSelectedText();
 
         const componentName: string = await askForComponentName(initialEditor);
 
         const targetFolder: string = await askForTargetFolder();
 
-        await scaffoldNewComponent(componentName, targetFolder, skipModuleImport);
-
         await replaceSelectionWithNewComponent(initialEditor, componentName, initialSelection);
 
-        await populateNewComponentWithSelection(targetFolder, componentName, initialSelectedText);
+        await createNewComponentWithSelectionAndOpen(
+            targetFolder,
+            componentName,
+            selectedTemplateText
+        );
 
         vscode.window.showInformationMessage(
             'Finished creating new component with selected content. Exiting...'
@@ -166,18 +128,10 @@ export function activate(context: vscode.ExtensionContext) {
     let extractToComponentCommand = vscode.commands.registerCommand(
         'elltg-right-click-to-angular-component.extractToComponent',
         async () => {
-            extractComponentMain(false);
+            extractComponentMain();
         }
     );
     context.subscriptions.push(extractToComponentCommand);
-
-    let extractToComponentSkipModuleImportCommand = vscode.commands.registerCommand(
-        'elltg-right-click-to-angular-component.extractToComponentSkipModuleImport',
-        async () => {
-            extractComponentMain(true);
-        }
-    );
-    context.subscriptions.push(extractToComponentSkipModuleImportCommand);
 }
 
 export function deactivate() {}
