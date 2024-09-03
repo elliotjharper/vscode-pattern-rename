@@ -27,10 +27,26 @@ export async function ensurePathExists(path: string): Promise<void> {
     }
 }
 
+export async function assertFileDoesNotAlreadyExist(path: string): Promise<void> {
+    let couldAccess: boolean;
+    try {
+        await access(path);
+        couldAccess = true;
+    } catch (err) {
+        couldAccess = false;
+    }
+
+    if (couldAccess) {
+        throw new Error(`File already exists at path: ${path}`);
+    }
+}
+
 export async function writeFileAtPath(path: string, content: string): Promise<void> {
     await assertPathIsWithinWorkspace(path);
 
     await ensurePathExists(path);
+
+    await assertFileDoesNotAlreadyExist(path);
 
     await writeFile(path, content);
 }

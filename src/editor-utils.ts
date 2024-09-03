@@ -1,23 +1,25 @@
 import * as vscode from 'vscode';
 
-export function activeEditor(): vscode.TextEditor {
-    const editor = vscode.window.activeTextEditor;
+let _editor: vscode.TextEditor | undefined = undefined;
 
-    if (!editor) {
+export function activeEditor(): vscode.TextEditor {
+    _editor = _editor || vscode.window.activeTextEditor;
+
+    if (!_editor) {
         throw new Error('No active editor. Exiting...');
     }
 
-    return editor;
+    return _editor;
 }
 
-export function getUserSelection(): vscode.Selection {
-    return activeEditor().selection;
-}
+export function getUserSelectionStartPosition(): number {
+    const editor = activeEditor();
+    const document = editor.document;
+    const position = editor.selection.active;
 
-export function getUserSelectedText(): string {
-    const selectedText = activeEditor().document.getText(getUserSelection());
+    const offset = document.offsetAt(position);
 
-    return selectedText;
+    return offset;
 }
 
 /** IMPORTANT: This will apply to whatever is the active editor  */

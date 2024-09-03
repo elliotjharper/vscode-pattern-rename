@@ -3,12 +3,14 @@ import {
     activeEditor,
     getUserSelectedText,
     getUserSelection,
+    getUserSelectionStartPosition,
     openFileInNewEditor,
     replaceSelectionInEditor,
     triggerFormatDocument,
 } from './editor-utils';
 import { writeFileAtPath } from './file-utils';
 import { dirname } from 'path';
+import { findNodeInSourceAtPosition } from './parser/node-matching';
 
 async function askForTypescriptName(initialEditor: vscode.TextEditor): Promise<string> {
     if (!initialEditor.selection) {
@@ -56,23 +58,37 @@ async function createNewTypescriptFileAndOpen(
 async function extractTypescriptMain(): Promise<void> {
     try {
         const initialEditor = activeEditor();
+        const initalDocument = initialEditor.document;
         const initialSelection = getUserSelection();
-        const selectedTemplateText = getUserSelectedText();
-        const initialEditorFilePath = initialEditor.document.fileName;
+        const initialSelectionStart = getUserSelectionStartPosition();
+        //const selectedTemplateText = getUserSelectedText();
+
+        const initialEditorFilePath = initalDocument.fileName;
         const initialEditorFileFolder = dirname(initialEditorFilePath);
 
-        const newTypescriptFileName: string = await askForTypescriptName(initialEditor);
+        const sourceFileText = initialEditor.document.getText();
+
+        const matchingNode = findNodeInSourceAtPosition(sourceFileText, initialSelectionStart);
+
+        throw new Error('jtyffjty');
+
+        // TODO: prompt if the located declaration was correct
+
+        // TODO: create file name based off located declaration
 
         // remove selection from the original file
         await replaceSelectionInEditor(initialEditor, initialSelection, '');
+
         // reformat the original file now content was removed
         await triggerFormatDocument();
 
-        await createNewTypescriptFileAndOpen(
-            initialEditorFileFolder,
-            newTypescriptFileName,
-            selectedTemplateText
-        );
+        // TODO: create the new file using the output from the located declaration
+        // TODO: mutate the declaration to force it to become an exported function
+        // await createNewTypescriptFileAndOpen(
+        //     initialEditorFileFolder,
+        //     newTypescriptFileName,
+        //     selectedTemplateText
+        // );
 
         vscode.window.showInformationMessage(
             'Finished creating new typescript file with selected content. Exiting...'
@@ -85,7 +101,7 @@ async function extractTypescriptMain(): Promise<void> {
 export function activate(context: vscode.ExtensionContext) {
     let extractToComponentCommand = vscode.commands.registerCommand(
         'elltg-right-click-to-extract-typescript.extractTypescript',
-        async () => {
+        async (uri: vscode.Uri) => {
             extractTypescriptMain();
         }
     );
