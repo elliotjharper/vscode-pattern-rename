@@ -3,7 +3,7 @@
     "displayName": "Right click to extract typescript",
     "description": "Select chunk of typescript and extract it to a new .ts file",
     "publisher": "elltg",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "repository": {
         "type": "git",
         "url": "https://github.com/elliotjharper/vscode-right-click-to-extract-function.git"
@@ -22,16 +22,25 @@
         "menus": {
             "editor/context": [
                 {
-                    "command": "elltg-right-click-to-extract-typescript.extractTypescript",
+                    "command": "elltg-right-click-to-extract-typescript.extractRawSelection",
                     "when": "resourceLangId == typescript && editorHasSelection",
+                    "group": "9_cutcopypaste"
+                },
+                {
+                    "command": "elltg-right-click-to-extract-typescript.extractClosestNode",
+                    "when": "resourceLangId == typescript",
                     "group": "9_cutcopypaste"
                 }
             ]
         },
         "commands": [
             {
-                "command": "elltg-right-click-to-extract-typescript.extractTypescript",
-                "title": "Extract to new .ts file"
+                "command": "elltg-right-click-to-extract-typescript.extractRawSelection",
+                "title": "Extract raw selection to new .ts file"
+            },
+            {
+                "command": "elltg-right-click-to-extract-typescript.extractClosestNode",
+                "title": "Extract closest to new .ts file"
             }
         ]
     },

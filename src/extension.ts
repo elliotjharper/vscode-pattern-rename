@@ -1,9 +1,6 @@
 import * as vscode from 'vscode';
 import {
-    activeEditor,
-    getUserSelectedText,
-    getUserSelection,
-    getUserSelectionStartPosition,
+    focusEditor,
     openFileInNewEditor,
     replaceSelectionInEditor,
     triggerFormatDocument,
@@ -11,84 +8,78 @@ import {
 import { writeFileAtPath } from './file-utils';
 import { dirname } from 'path';
 import { findNodeInSourceAtPosition } from './parser/node-matching';
+import { askForTypescriptName, askIsNameCorrect } from './user-prompts';
+import { camelToKebabCase } from './string.utils';
+import { ActiveEditorHelper } from './active-editor-helper';
+import { createNewTypescriptFileAndOpen } from './typescript-generation';
 
-async function askForTypescriptName(initialEditor: vscode.TextEditor): Promise<string> {
-    if (!initialEditor.selection) {
-        throw new Error('No active selection. Exiting...');
-    }
-
-    // ask user for a name for new component
-    let typescriptFileName = await vscode.window.showInputBox({
-        placeHolder: 'Type the new typescript file name (.ts is optional)',
-        validateInput: (userValue): string | undefined => {
-            if (!userValue) {
-                return 'Typescript file name required';
-            }
-
-            if (userValue.endsWith('.')) {
-                return 'Typescript file name shouldnt end with .';
-            }
-        },
-    });
-    if (!typescriptFileName) {
-        throw new Error('No Typescript file name provided. Exiting...');
-    }
-
-    if (!typescriptFileName.toLowerCase().endsWith('.ts')) {
-        typescriptFileName += '.ts';
-    }
-
-    return typescriptFileName;
-}
-
-async function createNewTypescriptFileAndOpen(
-    targetFileFolder: string,
-    targetFileName: string,
-    targetFileContent: string
-): Promise<void> {
-    vscode.window.showInformationMessage('Creating new typescript file...');
-
-    // write a new template file with the selection
-    const newPath = `${targetFileFolder}/${targetFileName}`;
-    await writeFileAtPath(newPath, targetFileContent);
-    await openFileInNewEditor(newPath);
-    await triggerFormatDocument();
-}
-
-async function extractTypescriptMain(): Promise<void> {
+async function extractRawSelection(): Promise<void> {
     try {
-        const initialEditor = activeEditor();
-        const initalDocument = initialEditor.document;
-        const initialSelection = getUserSelection();
-        const initialSelectionStart = getUserSelectionStartPosition();
-        //const selectedTemplateText = getUserSelectedText();
-
-        const initialEditorFilePath = initalDocument.fileName;
+        const initialEditorHelper = new ActiveEditorHelper();
+        const initialSelection = initialEditorHelper.getUserSelection();
+        const initialSelectionStart = initialEditorHelper.getUserSelectionStartPosition();
+        const selectedTemplateText = initialEditorHelper.getUserSelectedText();
+        const initialEditorFilePath = initialEditorHelper.document.fileName;
         const initialEditorFileFolder = dirname(initialEditorFilePath);
 
-        const sourceFileText = initialEditor.document.getText();
+        // prompt for new .ts file name
+        const newTypescriptFileName: string = await askForTypescriptName();
+
+        // remove selection from the original file
+        await replaceSelectionInEditor(initialEditorHelper.editor, initialSelection, '');
+
+        // reformat the original file now content was removed
+        await triggerFormatDocument(initialEditorHelper.editor);
+
+        // create the new file using the users selectoutput from the located declaration
+        const newFileEditor = await createNewTypescriptFileAndOpen(
+            initialEditorFileFolder,
+            newTypescriptFileName,
+            selectedTemplateText
+        );
+
+        vscode.window.showInformationMessage(
+            'Finished creating new typescript file with selected content. Exiting...'
+        );
+    } catch (err) {
+        vscode.window.showInformationMessage(`Error whilst extracting typescript: ${err}`);
+    }
+}
+
+async function extractClosestNode(): Promise<void> {
+    try {
+        const initialEditorHelper = new ActiveEditorHelper();
+        const initialSelectionStart = initialEditorHelper.getUserSelectionStartPosition();
+        const initialEditorFilePath = initialEditorHelper.document.fileName;
+        const initialEditorFileFolder = dirname(initialEditorFilePath);
+        const sourceFileText = initialEditorHelper.document.getText();
 
         const matchingNode = findNodeInSourceAtPosition(sourceFileText, initialSelectionStart);
 
-        throw new Error('jtyffjty');
+        // prompt if the located declaration was correct
+        const functionName = matchingNode.name.escapedText.toString();
+        if (!(await askIsNameCorrect(functionName))) {
+            return;
+        }
 
-        // TODO: prompt if the located declaration was correct
+        // create file name based off located declaration
+        const newTypescriptFileName = `${camelToKebabCase(functionName)}.ts`;
 
-        // TODO: create file name based off located declaration
-
-        // remove selection from the original file
-        await replaceSelectionInEditor(initialEditor, initialSelection, '');
+        // remove selection from the original file but using the positions from the AST node
+        const nodeRange = initialEditorHelper.getRangeForNode(matchingNode);
+        await replaceSelectionInEditor(initialEditorHelper.editor, nodeRange, '');
 
         // reformat the original file now content was removed
-        await triggerFormatDocument();
+        await triggerFormatDocument(initialEditorHelper.editor);
 
-        // TODO: create the new file using the output from the located declaration
+        // create the new file using the output from the located declaration
         // TODO: mutate the declaration to force it to become an exported function
-        // await createNewTypescriptFileAndOpen(
-        //     initialEditorFileFolder,
-        //     newTypescriptFileName,
-        //     selectedTemplateText
-        // );
+        const fullFunction = matchingNode.getFullText();
+        const newFileEditor = await createNewTypescriptFileAndOpen(
+            initialEditorFileFolder,
+            newTypescriptFileName,
+            fullFunction
+        );
 
         vscode.window.showInformationMessage(
             'Finished creating new typescript file with selected content. Exiting...'
@@ -99,13 +90,21 @@ async function extractTypescriptMain(): Promise<void> {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    let extractToComponentCommand = vscode.commands.registerCommand(
-        'elltg-right-click-to-extract-typescript.extractTypescript',
+    let extractRawCommand = vscode.commands.registerCommand(
+        'elltg-right-click-to-extract-typescript.extractRawSelection',
         async (uri: vscode.Uri) => {
-            extractTypescriptMain();
+            extractRawSelection();
         }
     );
-    context.subscriptions.push(extractToComponentCommand);
+    context.subscriptions.push(extractRawCommand);
+
+    let extractClosestCommand = vscode.commands.registerCommand(
+        'elltg-right-click-to-extract-typescript.extractClosestNode',
+        async (uri: vscode.Uri) => {
+            extractClosestNode();
+        }
+    );
+    context.subscriptions.push(extractClosestCommand);
 }
 
 export function deactivate() {}

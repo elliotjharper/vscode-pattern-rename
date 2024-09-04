@@ -1,29 +1,25 @@
 import * as vscode from 'vscode';
-
-let _editor: vscode.TextEditor | undefined = undefined;
+import { NodeObject } from './parser/actual-types';
 
 export function activeEditor(): vscode.TextEditor {
-    _editor = _editor || vscode.window.activeTextEditor;
+    const editor = vscode.window.activeTextEditor;
 
-    if (!_editor) {
+    if (!editor) {
         throw new Error('No active editor. Exiting...');
     }
 
-    return _editor;
+    return editor;
 }
 
-export function getUserSelectionStartPosition(): number {
-    const editor = activeEditor();
-    const document = editor.document;
-    const position = editor.selection.active;
-
-    const offset = document.offsetAt(position);
-
-    return offset;
+export async function focusEditor(targetEditor: vscode.TextEditor): Promise<void> {
+    // try to focus the editor that we want to trigger formatDocument on
+    await vscode.window.showTextDocument(targetEditor.document);
 }
 
-/** IMPORTANT: This will apply to whatever is the active editor  */
-export async function triggerFormatDocument(): Promise<void> {
+export async function triggerFormatDocument(targetEditor: vscode.TextEditor): Promise<void> {
+    await focusEditor(targetEditor);
+
+    // this command will just run on whatever is the currently focused editor so you must focus it first
     await vscode.commands.executeCommand('editor.action.formatDocument');
 }
 
@@ -35,9 +31,11 @@ export async function openFileInNewEditor(path: string): Promise<vscode.TextEdit
 
 export async function replaceSelectionInEditor(
     editor: vscode.TextEditor,
-    selection: vscode.Selection,
+    selection: vscode.Position | vscode.Range | vscode.Selection,
     replacementText: string
 ): Promise<void> {
+    await focusEditor(editor);
+
     await editor.edit((editBuilder) => {
         editBuilder.replace(selection, replacementText);
     });

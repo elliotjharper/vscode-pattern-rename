@@ -38,7 +38,14 @@ function convertWordBoundariesToKebabCase(input: string): string {
     return input.replace(wordBoundariesRegex, convertWordBoundaryToKebabCase);
 }
 
-export function pascalToKebabCase(input: string): string {
+export function camelToKebabCase(input: string): string {
+    // handle the word boundaries (to handle everything after that point)
+    input = convertWordBoundariesToKebabCase(input);
+
+    return input;
+}
+
+export function pascalToCamelCase(input: string): string {
     const isFirstCharacterUppercase = isCharacterUppercase(input[0]);
     if (!isFirstCharacterUppercase) {
         throw new Error('input does not appear to be PascalCase');
@@ -47,10 +54,15 @@ export function pascalToKebabCase(input: string): string {
     // handle beginning of the first word
     input = `${input[0].toLowerCase()}${input.substring(1)}`;
 
-    // handle the word boundaries (to handle everything after that point)
-    input = convertWordBoundariesToKebabCase(input);
-
     return input;
+}
+
+export function pascalToKebabCase(input: string): string {
+    const camelCased = pascalToCamelCase(input);
+
+    const kebabCased = camelToKebabCase(camelCased);
+
+    return kebabCased;
 }
 
 function convertWordBoundaryToPascalCase(wordBoundary: string): string {
