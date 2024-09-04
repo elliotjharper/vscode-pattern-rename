@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 export async function askIsNameCorrect(name: string): Promise<boolean> {
     const pick = await vscode.window.showQuickPick(['Yes', 'No'], {
-        placeHolder: `Is "${name}" the right token?`,
+        placeHolder: `Is "${name}" the right node?`,
     });
     return pick === 'Yes';
 }

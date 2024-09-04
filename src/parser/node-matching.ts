@@ -5,20 +5,26 @@ export function nodeSurroundsPosition(nodeObject: NodeObject, position: number):
     return nodeObject.pos <= position && nodeObject.end >= position;
 }
 
+export function nodeIsAfterPosition(nodeObject: NodeObject, position: number): boolean {
+    return nodeObject.pos > position;
+}
+
 export function findDeepestMatchingNodeObject(
     sourceFile: SourceFile,
     selectionStart: number
 ): NodeObject {
     let lastMatch: NodeObject | null = null;
 
-    for (const declaration of sourceFile.getNamedDeclarations().entries()) {
+    const namedDeclarations = Array.from(sourceFile.getNamedDeclarations().entries());
+    for (const declaration of namedDeclarations) {
         //const nodeName = declaration[0];
         const nodeObject = declaration[1][0];
 
         if (nodeSurroundsPosition(nodeObject, selectionStart)) {
             lastMatch = nodeObject;
-        } else if (lastMatch !== null) {
-            // if node does not surround position but we already found a match we must now have moved past the target site so end.
+        }
+
+        if (nodeIsAfterPosition(nodeObject, selectionStart)) {
             break;
         }
     }
