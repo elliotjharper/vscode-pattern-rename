@@ -12,6 +12,9 @@ import { askForTypescriptName, askIsNameCorrect } from './user-prompts';
 import { camelToKebabCase } from './string.utils';
 import { ActiveEditorHelper } from './active-editor-helper';
 import { createNewTypescriptFileAndOpen } from './typescript-generation';
+import { NodeObject } from './parser/actual-types';
+import { SyntaxKind } from 'typescript';
+import { getExportedNodeOutput } from './parser/node-transformation';
 
 async function extractRawSelection(): Promise<void> {
     try {
@@ -54,10 +57,10 @@ async function extractClosestNode(): Promise<void> {
         const initialEditorFileFolder = dirname(initialEditorFilePath);
         const sourceFileText = initialEditorHelper.document.getText();
 
-        const matchingNode = findNodeInSourceAtPosition(sourceFileText, initialSelectionStart);
+        let matchingNode = findNodeInSourceAtPosition(sourceFileText, initialSelectionStart);
 
         // prompt if the located declaration was correct
-        const functionName = matchingNode.name.escapedText.toString();
+        const functionName = matchingNode.name!.escapedText.toString();
         if (!(await askIsNameCorrect(functionName))) {
             return;
         }
@@ -73,12 +76,13 @@ async function extractClosestNode(): Promise<void> {
         await triggerFormatDocument(initialEditorHelper.editor);
 
         // create the new file using the output from the located declaration
-        // TODO: mutate the declaration to force it to become an exported function
-        const fullFunction = matchingNode.getFullText();
+
+        const nodeOutput = getExportedNodeOutput(matchingNode);
+
         const newFileEditor = await createNewTypescriptFileAndOpen(
             initialEditorFileFolder,
             newTypescriptFileName,
-            fullFunction
+            nodeOutput
         );
 
         vscode.window.showInformationMessage(

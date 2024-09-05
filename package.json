@@ -3,7 +3,7 @@
     "displayName": "Right click to extract typescript",
     "description": "Select chunk of typescript and extract it to a new .ts file",
     "publisher": "elltg",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "repository": {
         "type": "git",
         "url": "https://github.com/elliotjharper/vscode-right-click-to-extract-function.git"

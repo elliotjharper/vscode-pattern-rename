@@ -5,7 +5,8 @@ import * as ts from 'typescript';
 // This file contains types to strongly type extra parts that I am using.
 
 export type NodeObject = ts.Node & {
-    name: ts.Identifier;
+    name?: ts.Identifier;
+    modifiers?: ts.NodeArray<ts.ModifierLike>;
 };
 
 export type SourceFile = ts.SourceFile & {

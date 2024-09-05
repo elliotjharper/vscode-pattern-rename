@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
+import { camelToKebabCase } from './string.utils';
 
 export async function askIsNameCorrect(name: string): Promise<boolean> {
     const pick = await vscode.window.showQuickPick(['Yes', 'No'], {
-        placeHolder: `Is "${name}" the right node?`,
+        placeHolder: `Extract ${name} to ${camelToKebabCase(name)}.ts?`,
     });
     return pick === 'Yes';
 }
