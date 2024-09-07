@@ -9,7 +9,7 @@ This extension lets you easily construct a new typescript file out of a chunk of
 -   The extension will then cut your selection and write it out to a new .ts file in the same folder
 
 _Demo:_
-TODO...
+<img src="https://raw.githubusercontent.com/elliotjharper/vscode-right-click-to-extract-function/main/images/demo.gif" alt="demo">
 
 ## Roadmap
 

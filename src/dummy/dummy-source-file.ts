@@ -1,12 +1,4 @@
-export function myFirstFunction(): void {
-    console.log('test');
-}
-
-export function mySecondFunction(): void {
-    console.log('test');
-}
-
-export function myThirdFunction(): void {
+export function myExportedFunction(): void {
     console.log('test');
 }
 
@@ -23,7 +15,7 @@ export class Foo {
         console.log('test');
     }
 
-    private async somePrivateBadFunction(): Promise<void> {
+    private async somePrivateFunction(): Promise<void> {
         console.log('test');
     }
 }
