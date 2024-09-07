@@ -1,17 +1,19 @@
 ## Features
 
-This extension lets you easily construct a new typescript file out of a chunk of a .ts file.
+Enables you to quickly extract a function/class out to a new .ts file.
+It will derive a file from the name of the element that you select.
+Lets say you want to extract a function:
 
--   Select the text that you want to extract (must be in a .ts file).
--   Right click and the context menu will include the option "Extract to new .ts file"
--   The extension will then ask you for the name for your new .ts file.
-    -   (You can end with .ts or you can leave that to the extension that will append .ts if your input does not end with .ts)
--   The extension will then cut your selection and write it out to a new .ts file in the same folder
+-   Right click the function name (or really anywhere on the declaration of the function)
+-   In the context menu select "Extract typescript node to new .ts file"
+-   It will ask you to confirm that it recognised the correct element to extract.
+-   Upon confirmation it will remove the node from the original file, create a new file with the element
+-   If the element is a top level/class function it will do any required conversions to ensure that it is an exported function.
 
 _Demo:_
 <img src="https://raw.githubusercontent.com/elliotjharper/vscode-right-click-to-extract-function/main/images/demo.gif" alt="demo">
 
-## Roadmap
+Additionally you can also right click on a text selection in a .ts file and use the extra option "Extract raw selection to new .ts file".
+I created this for situations where you may want to pull many items out of a file in one go.
 
--   make it possible to just invoke by right clicking within a function and then the extension should find if the point of invocation was within a
-    function and ask the user "Please confirm, you wanted to extract {TARGET FUNCTION NAME}?" - use the typescript compiler API to get an AST and use that to get the function out - handle if the original function was not exported or if it was part of a class (`public theSelectedFunction() {}`) in other words, do what is necessary to turn it into an exported function
+## Roadmap
