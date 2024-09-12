@@ -4,7 +4,7 @@
     "description": "Select multiple files or a folder and rename the files in batch using plain text / regex replacement.",
     "icon": "images/logo-npm-run_128.png",
     "publisher": "elltg",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "repository": {
         "type": "git",
         "url": "https://github.com/elliotjharper/vscode-pattern-rename.git"
