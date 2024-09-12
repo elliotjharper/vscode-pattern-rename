@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { NodeObject } from './parser/actual-types';
 
 export function activeEditor(): vscode.TextEditor {
     const editor = vscode.window.activeTextEditor;

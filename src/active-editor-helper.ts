@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { NodeObject } from './parser/actual-types';
 import { activeEditor } from './editor-utils';
 
 export class ActiveEditorHelper {
@@ -31,12 +30,5 @@ export class ActiveEditorHelper {
 
     public getPositionFromOffset(offset: number): vscode.Position {
         return this.document.positionAt(offset);
-    }
-
-    public getRangeForNode(node: NodeObject): vscode.Range {
-        const nodeStartPosition = this.getPositionFromOffset(node.pos);
-        const nodeEndPosition = this.getPositionFromOffset(node.end);
-        const nodeRange = new vscode.Range(nodeStartPosition, nodeEndPosition);
-        return nodeRange;
     }
 }

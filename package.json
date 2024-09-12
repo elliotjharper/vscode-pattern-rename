@@ -1,13 +1,13 @@
 {
-    "name": "elltg-right-click-to-extract-typescript",
-    "displayName": "Right click to extract typescript",
-    "description": "Select chunk of typescript and extract it to a new .ts file",
+    "name": "elltg-pattern-rename",
+    "displayName": "Batch file rename (Pattern Rename)",
+    "description": "Select multiple files or a folder and rename the files in batch using plain text / regex replacement.",
     "icon": "images/logo-npm-run_128.png",
     "publisher": "elltg",
-    "version": "1.0.8",
+    "version": "1.0.1",
     "repository": {
         "type": "git",
-        "url": "https://github.com/elliotjharper/vscode-right-click-to-extract-function.git"
+        "url": "https://github.com/elliotjharper/vscode-pattern-rename.git"
     },
     "engines": {
         "vscode": "^1.71.0"
@@ -16,32 +16,22 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:elltg-right-click-to-extract-typescript.extractTypescript"
+        "onCommand:elltg-pattern-rename.beginPatternRename"
     ],
     "main": "./dist/extension.js",
     "contributes": {
         "menus": {
-            "editor/context": [
+            "explorer/context": [
                 {
-                    "command": "elltg-right-click-to-extract-typescript.extractRawSelection",
-                    "when": "resourceLangId == typescript && editorHasSelection",
-                    "group": "9_cutcopypaste"
-                },
-                {
-                    "command": "elltg-right-click-to-extract-typescript.extractClosestNode",
-                    "when": "resourceLangId == typescript",
-                    "group": "9_cutcopypaste"
+                    "command": "elltg-pattern-rename.beginPatternRename",
+                    "group": "7_modification"
                 }
             ]
         },
         "commands": [
             {
-                "command": "elltg-right-click-to-extract-typescript.extractRawSelection",
-                "title": "Extract raw selection to new .ts file"
-            },
-            {
-                "command": "elltg-right-click-to-extract-typescript.extractClosestNode",
-                "title": "Extract typescript node to new .ts file"
+                "command": "elltg-pattern-rename.beginPatternRename",
+                "title": "Pattern Rename"
             }
         ]
     },
@@ -54,10 +44,7 @@
         "watch-tests": "tsc -p . -w --outDir out",
         "pretest": "npm run compile-tests && npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
-        "test": "node ./out/test/runTest.js",
-        "parser:build": "tsc --project ./src/parser/tsconfig.json",
-        "parser:run": "node --inspect ./src/parser/parse-test.js",
-        "parser:build-and-run": "npm run parser:build && npm run parser:run"
+        "test": "node ./out/test/runTest.js"
     },
     "devDependencies": {
         "@types/glob": "^7.2.0",
@@ -68,11 +55,17 @@
         "@typescript-eslint/parser": "^5.31.0",
         "@vscode/test-electron": "^2.1.5",
         "eslint": "^8.20.0",
+        "file-loader": "^6.2.0",
         "glob": "^8.0.3",
         "mocha": "^10.0.0",
+        "raw-loader": "^4.0.2",
         "ts-loader": "^9.3.1",
         "typescript": "^5.5.4",
+        "url-loader": "^4.1.1",
         "webpack": "^5.74.0",
         "webpack-cli": "^4.10.0"
+    },
+    "dependencies": {
+        "bulma": "^1.0.2"
     }
 }
