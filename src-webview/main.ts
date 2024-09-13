@@ -42,9 +42,9 @@ function applyFileList(files: IFileItem[]): void {
 
 function setupMessageListener() {
     window.addEventListener('message', (event) => {
-        console.log(`[From Host] message received`);
-        console.log(event);
         const message = event.data;
+
+        console.log(`[From Host] message received of type = ${message.type}`);
 
         switch (message.type) {
             case 'newFileList':
