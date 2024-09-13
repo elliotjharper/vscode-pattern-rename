@@ -1,22 +1,28 @@
-let vscode;
+import { WebviewApi } from 'vscode-webview';
+import { IFileItem } from '../src-shared/models/models';
+import { assertNotNullish } from '../src-shared/utils/assert-not-nullish';
 
-function getFilesTableBody() {
-    return document.getElementById('files-table-body');
+let vscodeapi: WebviewApi<unknown>;
+
+function getFilesTableBody(): HTMLTableElement {
+    const element = document.getElementById('files-table-body');
+    assertNotNullish(element);
+    return element as HTMLTableElement;
 }
 
-function clearFilesTable() {
+function clearFilesTable(): void {
     const tbody = getFilesTableBody();
     tbody.replaceChildren();
 }
 
-function createFileCell(text) {
+function createFileCell(text: string): HTMLTableCellElement {
     const td = document.createElement('td');
     td.innerText = text;
     td.classList.add('is-size-7');
     return td;
 }
 
-function addFileRow(tbody, file) {
+function addFileRow(tbody: HTMLTableElement, file: IFileItem): void {
     const tr = document.createElement('tr');
 
     tr.appendChild(createFileCell(file.currentFileName));
@@ -25,7 +31,7 @@ function addFileRow(tbody, file) {
     tbody.appendChild(tr);
 }
 
-function applyFileList(files) {
+function applyFileList(files: IFileItem[]): void {
     clearFilesTable();
 
     const tbody = getFilesTableBody();
@@ -51,11 +57,11 @@ function setupMessageListener() {
     });
 }
 
-function getMatchTypeElements() {
-    return document.querySelectorAll('input[type="radio"][name="match-type"]');
+function getMatchTypeElements(): HTMLInputElement[] {
+    return Array.from(document.querySelectorAll('input[type="radio"][name="match-type"]'));
 }
 
-function getMatchType() {
+function getMatchType(): string {
     for (const radio of getMatchTypeElements()) {
         if (radio.checked) {
             return radio.value;
@@ -64,26 +70,30 @@ function getMatchType() {
     throw new Error('No radio checked?');
 }
 
-function getMatchPatternElement() {
-    return document.getElementById('match-pattern');
+function getMatchPatternElement(): HTMLInputElement {
+    const element = document.getElementById('match-pattern');
+    assertNotNullish(element);
+    return element as HTMLInputElement;
 }
 
-function getMatchPattern() {
+function getMatchPattern(): string {
     const input = getMatchPatternElement();
     return input.value;
 }
 
-function getReplacementElement() {
-    return document.getElementById('replacement');
+function getReplacementElement(): HTMLInputElement {
+    const element = document.getElementById('replacement');
+    assertNotNullish(element);
+    return element as HTMLInputElement;
 }
 
-function getReplacement() {
+function getReplacement(): string {
     const input = getReplacementElement();
     return input.value;
 }
 
 function getFileList() {
-    vscode.postMessage({
+    vscodeapi.postMessage({
         type: 'getFileList',
         matchType: getMatchType(),
         matchPattern: getMatchPattern(),
@@ -92,7 +102,7 @@ function getFileList() {
 }
 
 function confirmChanges() {
-    vscode.postMessage({
+    vscodeapi.postMessage({
         type: 'confirm',
         matchType: getMatchType(),
         matchPattern: getMatchPattern(),
@@ -101,9 +111,21 @@ function confirmChanges() {
 }
 
 function cancel() {
-    vscode.postMessage({
+    vscodeapi.postMessage({
         type: 'cancel',
     });
+}
+
+function getConfirmElement(): HTMLButtonElement {
+    const element = document.getElementById('confirm');
+    assertNotNullish(element);
+    return element as HTMLButtonElement;
+}
+
+function getCancelElement(): HTMLButtonElement {
+    const element = document.getElementById('cancel');
+    assertNotNullish(element);
+    return element as HTMLButtonElement;
 }
 
 function setupDomListeners() {
@@ -112,24 +134,24 @@ function setupDomListeners() {
 
     for (const input of [matchPattern, replacement, ...getMatchTypeElements()]) {
         input.addEventListener('input', () => {
-            this.getFileList();
+            getFileList();
         });
     }
 
-    document.getElementById('confirm').addEventListener('click', () => {
+    getConfirmElement().addEventListener('click', () => {
         confirmChanges();
     });
 
-    document.getElementById('cancel').addEventListener('click', () => {
+    getCancelElement().addEventListener('click', () => {
         cancel();
     });
 }
 
 function startRenameApp() {
-    vscode = acquireVsCodeApi();
+    vscodeapi = acquireVsCodeApi();
     setupMessageListener();
     setupDomListeners();
     getFileList();
 }
 
-window.onload = startRenameApp();
+startRenameApp();

@@ -1,7 +1,7 @@
 import { rename } from 'fs/promises';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { IFileItem } from './models';
+import { IFileItem } from '../../src-shared/models/models';
 import { startRenameView } from './start';
 
 // log all messages

@@ -6,8 +6,8 @@ function getTemplate(): string {
     let template = require('../../src-webview/view.html').default as string;
 
     // .js uses the webpack url-loader
-    let scriptPath = require('../../src-webview/view.js').default as string;
-    template = template.replace('view.js', scriptPath);
+    let scriptPath = require('../../dist-webview/bundle.js').default as string;
+    template = template.replace('bundle.js', scriptPath);
 
     // .css uses the webpack url-loader
     let bulmaStylePath = require('../../node_modules/bulma/css/bulma.css').default as string;

@@ -1,17 +1,17 @@
 // See https://go.microsoft.com/fwlink/?LinkId=733558
 // for the documentation about the tasks.json format
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "extension webpack compile",
-			"type": "npm",
-			"script": "extension:compile",
-			"problemMatcher": [],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
-		},
-	]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "compile",
+            "type": "npm",
+            "script": "compile:all",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
 }

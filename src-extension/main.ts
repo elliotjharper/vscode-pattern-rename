@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { keyPluck } from './utils/array-pluck';
+import { keyPluck } from '../src-shared/utils/array-pluck';
+import { sortArray } from '../src-shared/utils/sorting';
 import { getExplorerSelectionFilesList } from './utils/file';
-import { sortArray } from './utils/sorting';
 import { ViewHost } from './view-host/host';
 
 export function activate(context: vscode.ExtensionContext) {

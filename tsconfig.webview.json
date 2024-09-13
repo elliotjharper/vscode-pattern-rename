@@ -3,10 +3,11 @@
 		"module": "commonjs",
 		"target": "ES2020",
 		"lib": [
-			"ES2020"
+			"ES2020", "DOM"
 		],
+		"types": ["vscode-webview"],
 		"sourceMap": true,
-		"rootDirs": ["src-extension", "src-shared"],
+		"rootDirs": ["src-webview", "src-shared"],
 		"strict": true   /* enable all strict type-checking options */
 		/* Additional Checks */
 		// "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
@@ -14,5 +15,5 @@
 		// "noUnusedParameters": true,  /* Report errors on unused parameters. */
 	},
 	//,	"include": ["src/**/*.ts", "src/html.d.ts"]
-	"exclude": ["src-webview/**/*.ts"]
+	"exclude": ["src-extension/**/*.ts"]
 }
