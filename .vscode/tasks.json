@@ -4,9 +4,9 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "webpack compile",
+			"label": "extension webpack compile",
 			"type": "npm",
-			"script": "compile",
+			"script": "extension:compile",
 			"problemMatcher": [],
 			"group": {
 				"kind": "build",

@@ -3,16 +3,16 @@ import { viewTitle, viewType } from './constants';
 
 function getTemplate(): string {
     // .html uses the webpack raw-loader
-    let template = require('./view.html').default as string;
+    let template = require('../../src-webview/view.html').default as string;
 
     // .js uses the webpack url-loader
-    let scriptPath = require('./view.js').default as string;
+    let scriptPath = require('../../src-webview/view.js').default as string;
     template = template.replace('view.js', scriptPath);
 
     // .css uses the webpack url-loader
     let bulmaStylePath = require('../../node_modules/bulma/css/bulma.css').default as string;
     template = template.replace('bulma.css', bulmaStylePath);
-    let stylePath = require('./view.css').default as string;
+    let stylePath = require('../../src-webview/view.css').default as string;
     template = template.replace('view.css', stylePath);
 
     return template;

@@ -1,8 +1,8 @@
 import { rename } from 'fs/promises';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { IFileItem } from './models';
 import { startRenameView } from './start';
-import path = require('path');
 
 // log all messages
 // once page loaded send message asking for data

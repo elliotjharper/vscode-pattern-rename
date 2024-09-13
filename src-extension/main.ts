@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { keyPluck } from './array-pluck';
-import { getExplorerSelectionFilesList } from './file-utils';
-import { ViewHost } from './rename-view/host';
-import { sortArray } from './sorting';
+import { keyPluck } from './utils/array-pluck';
+import { getExplorerSelectionFilesList } from './utils/file';
+import { sortArray } from './utils/sorting';
+import { ViewHost } from './view-host/host';
 
 export function activate(context: vscode.ExtensionContext) {
     let extractRawCommand = vscode.commands.registerCommand(

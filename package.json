@@ -18,7 +18,7 @@
     "activationEvents": [
         "onCommand:elltg-pattern-rename.beginPatternRename"
     ],
-    "main": "./dist/extension.js",
+    "main": "./dist-extension/main.js",
     "contributes": {
         "menus": {
             "explorer/context": [
@@ -36,10 +36,11 @@
         ]
     },
     "scripts": {
-        "vscode:prepublish": "npm run package",
-        "compile": "webpack",
-        "watch": "webpack --watch",
-        "package": "webpack --mode production --devtool hidden-source-map",
+        "vscode:prepublish": "npm run extension:package",
+        "extension:compile": "webpack --config webpack.extension.js --mode development",
+        "extension:package": "webpack --config webpack.extension.js --mode production --devtool hidden-source-map",
+        "webview:compile:development": "webpack --config webpack.webview.js --mode development",
+        "webview:compile:production": "webpack --config webpack.webview.js --mode production",
         "compile-tests": "tsc -p . --outDir out",
         "watch-tests": "tsc -p . -w --outDir out",
         "pretest": "npm run compile-tests && npm run compile && npm run lint",
