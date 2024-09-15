@@ -41,18 +41,20 @@ const extensionConfig = {
                 ],
             },
             {
-                test: /\.(txt|html)$/,
-                use: [
-                    {
-                        loader: 'raw-loader',
-                    },
-                ],
-            },
-            {
                 test: /\.(css|js)$/,
+                exclude: /node_modules/,
                 use: [
                     {
-                        loader: 'url-loader',
+                        loader: 'style-loader',
+                    },
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            importLoaders: 1,
+                        },
+                    },
+                    {
+                        loader: 'postcss-loader',
                     },
                 ],
             },

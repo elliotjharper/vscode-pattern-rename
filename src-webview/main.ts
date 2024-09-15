@@ -1,6 +1,7 @@
 import { WebviewApi } from 'vscode-webview';
 import { IFileItem } from '../src-shared/models/models';
 import { assertNotNullish } from '../src-shared/utils/assert-not-nullish';
+import './view.css';
 
 let vscodeapi: WebviewApi<unknown>;
 
