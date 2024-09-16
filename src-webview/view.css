@@ -6,3 +6,17 @@
     padding-top: 6px;
     gap: 10px;
 }
+
+@layer components {
+    body.dark {
+        @apply bg-[#1e1e1e];
+    }
+
+    body.light {
+        @apply bg-white;
+    }
+}
+
+.some-other-styles {
+    color: red;
+}

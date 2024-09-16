@@ -12,7 +12,7 @@ import { startRenameView } from './start';
 export class ViewHost {
     public panel: vscode.WebviewPanel;
 
-    constructor(public targetFiles: vscode.Uri[]) {
+    constructor(public targetFiles: vscode.Uri[], public isDarkMode: boolean) {
         this.panel = startRenameView();
         this.listenForMessages();
     }
@@ -68,6 +68,13 @@ export class ViewHost {
         });
     }
 
+    private sendIsDarkMode(): void {
+        this.panel.webview.postMessage({
+            type: 'sendIsDarkMode',
+            isDarkMode: this.isDarkMode
+        });
+    }
+
     private async confirm(
         matchType: string,
         matchPattern: string,
@@ -109,6 +116,10 @@ export class ViewHost {
             console.log(`[From View] Type = ${message}`);
 
             switch (message.type) {
+                case 'getIsDarkMode':
+                    this.sendIsDarkMode();
+                    return;
+
                 case 'getFileList':
                     this.buildAndSendFileList(
                         message.matchType,

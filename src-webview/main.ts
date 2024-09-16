@@ -41,6 +41,17 @@ function applyFileList(files: IFileItem[]): void {
     }
 }
 
+function applyIsDarkMode(isDarkMode: boolean): void {
+    const bodyElem = document.getElementById('body');
+    assertNotNullish(bodyElem);
+    if(isDarkMode) {
+        bodyElem.classList.add('dark');
+    } else {
+        bodyElem.classList.add('light');
+        bodyElem.classList.add('theme-light');
+    }
+}
+
 function setupMessageListener() {
     window.addEventListener('message', (event) => {
         const message = event.data;
@@ -50,6 +61,10 @@ function setupMessageListener() {
         switch (message.type) {
             case 'newFileList':
                 applyFileList(message.files);
+                break;
+
+            case 'sendIsDarkMode':
+                applyIsDarkMode(message.isDarkMode);
                 break;
 
             default:
@@ -99,6 +114,12 @@ function getFileList() {
         matchType: getMatchType(),
         matchPattern: getMatchPattern(),
         replacement: getReplacement(),
+    });
+}
+
+function getIsDarkMode() {
+    vscodeapi.postMessage({
+        type: 'getIsDarkMode'
     });
 }
 
@@ -153,6 +174,7 @@ function startRenameApp() {
     setupMessageListener();
     setupDomListeners();
     getFileList();
+    getIsDarkMode();
 }
 
 startRenameApp();
