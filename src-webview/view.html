@@ -7,99 +7,89 @@
         <script src="bundle.js" defer></script>
     </head>
 
-    <body class="theme-light">
-        <section class="hero">
-            <div class="hero-body">
-                <!-- <p class="title">Pattern Rename</p> -->
-                <p class="subtitle">
-                    Rename files in batch using a matching pattern (plain or regex) and a
-                    replacement.
-                </p>
-            </div>
-        </section>
+    <body class="theme-light p-5">
+        <div class="text-2xl">Batch file rename options:</div>
 
-        <div class="columns">
-            <div class="column is-10">
-                <div class="field is-horizontal">
-                    <div class="field-label is-small">
-                        <label class="label">Match Type</label>
-                    </div>
+        <div class="mt-5">
+            <div class="field is-horizontal">
+                <div class="field-label is-small">
+                    <label class="label">Match Type</label>
+                </div>
 
-                    <div class="field-body radio-field-body is-size-7">
-                        <label>
+                <div class="field-body">
+                    <div class="flex flex-row leading-4 gap-5 text-sm">
+                        <label class="flex flex-row gap-1 items-center">
                             <input type="radio" name="match-type" value="Plain" checked />
-                            Plain
+                            <span>Plain</span>
                         </label>
 
-                        <label>
+                        <label class="flex flex-row gap-1 items-center">
                             <input type="radio" name="match-type" value="RegEx" />
-                            RegEx
+                            <span>RegEx</span>
                         </label>
                     </div>
                 </div>
+            </div>
 
-                <div class="field is-horizontal">
-                    <div class="field-label is-small">
-                        <label class="label">Match Pattern</label>
-                    </div>
-
-                    <div class="field-body">
-                        <div class="field">
-                            <p class="control is-expanded">
-                                <input
-                                    class="input is-small"
-                                    type="text"
-                                    id="match-pattern"
-                                    placeholder="before.ts"
-                                />
-                            </p>
-                        </div>
-                    </div>
+            <div class="field is-horizontal">
+                <div class="field-label is-small">
+                    <label class="label">Match Pattern</label>
                 </div>
 
-                <div class="field is-horizontal">
-                    <div class="field-label is-small">
-                        <label class="label">Replacement</label>
+                <div class="field-body">
+                    <div class="field max-w-96">
+                        <p class="control is-expanded">
+                            <input
+                                class="input is-small"
+                                type="text"
+                                id="match-pattern"
+                                placeholder="before.ts"
+                            />
+                        </p>
                     </div>
+                </div>
+            </div>
 
-                    <div class="field-body">
-                        <div class="field">
-                            <p class="control is-expanded">
-                                <input
-                                    class="input is-small"
-                                    type="text"
-                                    id="replacement"
-                                    placeholder="after.ts"
-                                />
-                            </p>
-                        </div>
+            <div class="field is-horizontal">
+                <div class="field-label is-small">
+                    <label class="label">Replacement</label>
+                </div>
+
+                <div class="field-body">
+                    <div class="field">
+                        <p class="control is-expanded max-w-96">
+                            <input
+                                class="input is-small"
+                                type="text"
+                                id="replacement"
+                                placeholder="after.ts"
+                            />
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="columns">
-            <div class="column is-9 is-offset-1">
-                <table class="table is-fullwidth">
-                    <thead>
-                        <tr>
-                            <th class="is-size-7">Before</th>
-                            <th class="is-size-7">After</th>
-                        </tr>
-                    </thead>
+        <div class="text-2xl mt-10">Batch file rename preview:</div>
 
-                    <tbody id="files-table-body">
-                        <tr>
-                            <td class="is-size-7" colspan="2">Loading...</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <table class="mt-5 table is-fullwidth">
+            <thead>
+                <tr>
+                    <th class="is-size-7">Before</th>
+                    <th class="is-size-7">After</th>
+                </tr>
+            </thead>
 
-                <div class="buttons">
-                    <button id="confirm" class="button is-small is-primary">Confirm</button>
-                    <button id="cancel" class="button is-small">Cancel</button>
-                </div>
-            </div>
+            <tbody id="files-table-body">
+                <tr>
+                    <td class="is-size-7" colspan="2">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="buttons">
+            <button id="confirm" class="button is-small is-primary">Confirm</button>
+            <button id="cancel" class="button is-small">Cancel</button>
         </div>
     </body>
 </html>
