@@ -4,7 +4,7 @@
     "description": "Select multiple files or a folder and rename the files in batch using plain text / regex replacement.",
     "icon": "images/logo-npm-run_128.png",
     "publisher": "elltg",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "repository": {
         "type": "git",
         "url": "https://github.com/elliotjharper/vscode-pattern-rename.git"
@@ -36,7 +36,7 @@
         ]
     },
     "scripts": {
-        "vscode:prepublish": "npm run extension:package",
+        "vscode:prepublish": "npm run webview:package && npm run extension:package",
         "extension:compile": "webpack --config webpack.extension.js --mode development",
         "extension:package": "webpack --config webpack.extension.js --mode production --devtool hidden-source-map",
         "webview:compile": "webpack --config webpack.webview.js --mode development",

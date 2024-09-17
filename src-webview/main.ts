@@ -44,8 +44,9 @@ function applyFileList(files: IFileItem[]): void {
 function applyIsDarkMode(isDarkMode: boolean): void {
     const bodyElem = document.getElementById('body');
     assertNotNullish(bodyElem);
-    if(isDarkMode) {
+    if (isDarkMode) {
         bodyElem.classList.add('dark');
+        bodyElem.classList.add('theme-dark');
     } else {
         bodyElem.classList.add('light');
         bodyElem.classList.add('theme-light');
@@ -119,7 +120,7 @@ function getFileList() {
 
 function getIsDarkMode() {
     vscodeapi.postMessage({
-        type: 'getIsDarkMode'
+        type: 'getIsDarkMode',
     });
 }
 
