@@ -16,11 +16,8 @@
         @apply bg-white;
     }
 
+    body,
     .label {
         @apply text-slate-900 dark:text-white;
     }
-}
-
-.some-other-styles {
-    color: red;
 }
