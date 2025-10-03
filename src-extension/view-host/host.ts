@@ -2,6 +2,7 @@ import { rename } from 'fs/promises';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { IFileItem } from '../../src-shared/models/models';
+import { replaceTokens } from '../../src-shared/utils/token-replacement';
 import { startRenameView } from './start';
 
 // log all messages
@@ -29,16 +30,19 @@ export class ViewHost {
     ): IFileItem {
         const currentFileName = path.basename(uri.fsPath);
 
+        // Apply token replacement to the replacement string
+        const replacementWithTokens = replaceTokens(replacement);
+
         let newFileName: string | null = null;
         if (matchPattern && replacement && matchType === 'Plain') {
-            const replaced = currentFileName.replace(matchPattern, replacement);
+            const replaced = currentFileName.replace(matchPattern, replacementWithTokens);
             if (replaced !== currentFileName) {
                 newFileName = replaced;
             }
         }
 
         if (matchPattern && replacement && matchType === 'RegEx') {
-            const replaced = currentFileName.replace(new RegExp(matchPattern), replacement);
+            const replaced = currentFileName.replace(new RegExp(matchPattern), replacementWithTokens);
             if (replaced !== currentFileName) {
                 newFileName = replaced;
             }
