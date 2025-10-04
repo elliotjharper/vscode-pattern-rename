@@ -20,4 +20,10 @@
     .label {
         @apply text-slate-900 dark:text-white;
     }
+
+    /* Style for rows that won't be renamed - make them visually distinct with duller text */
+    .no-rename-row td {
+        @apply text-slate-600 dark:text-slate-500;
+        opacity: 0.4;
+    }
 }

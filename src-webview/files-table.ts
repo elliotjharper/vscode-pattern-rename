@@ -16,11 +16,16 @@ export function createFileCell(text: string): HTMLTableCellElement {
 export function addFileRow(tbody: HTMLTableElement, file: IFileItem): void {
     const tr = document.createElement('tr');
 
+    // Add CSS class for rows that won't be renamed to make them visually distinct
+    if (!file.newFileName) {
+        tr.classList.add('no-rename-row');
+    }
+
     // before
     tr.appendChild(createFileCell(file.currentFileName));
 
     // will be changed
-    tr.appendChild(createFileCell(file.newFileName ? 'Yes' : 'No'));
+    tr.appendChild(createFileCell(file.newFileName ? '✅' : '❌'));
 
     // after
     tr.appendChild(createFileCell(file.newFileName ?? '-'));
