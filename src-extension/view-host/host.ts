@@ -2,6 +2,7 @@ import { rename } from 'fs/promises';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { IFileItem } from '../../src-shared/models/models';
+import { replaceTokens } from '../../src-shared/utils/token-replacement';
 import { longestCommonSubstring } from '../utils/string';
 import { startRenameView } from './start';
 
@@ -32,14 +33,21 @@ export class ViewHost {
 
         let newFileName: string | null = null;
         if (matchPattern && replacement && matchType === 'Plain') {
-            const replaced = currentFileName.replace(matchPattern, replacement);
+            // Replace tokens in the replacement string before applying it
+            const processedReplacement = replaceTokens(replacement);
+            const replaced = currentFileName.replace(matchPattern, processedReplacement);
             if (replaced !== currentFileName) {
                 newFileName = replaced;
             }
         }
 
         if (matchPattern && replacement && matchType === 'RegEx') {
-            const replaced = currentFileName.replace(new RegExp(matchPattern), replacement);
+            // Replace tokens in the replacement string before applying it
+            const processedReplacement = replaceTokens(replacement);
+            const replaced = currentFileName.replace(
+                new RegExp(matchPattern),
+                processedReplacement
+            );
             if (replaced !== currentFileName) {
                 newFileName = replaced;
             }
