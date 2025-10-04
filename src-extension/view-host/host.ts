@@ -84,6 +84,23 @@ export class ViewHost {
             return this.createReplacementItem(targetFile, matchType, matchPattern, replacement);
         });
 
+        // Sort files: targeted files (being renamed) first, then by name
+        filesList.sort((a, b) => {
+            // Files being renamed (have newFileName) come first
+            const aIsTargeted = a.newFileName !== null;
+            const bIsTargeted = b.newFileName !== null;
+
+            if (aIsTargeted && !bIsTargeted) {
+                return -1; // a comes first
+            }
+            if (!aIsTargeted && bIsTargeted) {
+                return 1; // b comes first
+            }
+
+            // Both are targeted or both are not targeted, sort by current filename
+            return a.currentFileName.localeCompare(b.currentFileName);
+        });
+
         // using the input and replacement produce the list
         this.panel.webview.postMessage({
             type: 'newFileList',
