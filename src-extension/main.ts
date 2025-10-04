@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
 
             targetFiles = sortArray(targetFiles, keyPluck('fsPath'), true);
-            
+
             new ViewHost(targetFiles, isDarkMode());
         }
     );

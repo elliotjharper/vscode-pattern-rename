@@ -1,5 +1,5 @@
 import { IFileItem } from '../src-shared/models/models';
-import { getFilesTableBody } from './dom-getters';
+import { getFilesTableBody, getMatchPatternElement, getReplacementElement } from './dom-getters';
 
 export function clearFilesTable(): void {
     const tbody = getFilesTableBody();
@@ -26,6 +26,14 @@ export function addFileRow(tbody: HTMLTableElement, file: IFileItem): void {
     tr.appendChild(createFileCell(file.newFileName ?? '-'));
 
     tbody.appendChild(tr);
+}
+
+export function applyInitialMatchText(initialMatchText: string): void {
+    const matchPatternElement = getMatchPatternElement();
+    matchPatternElement.value = initialMatchText;
+
+    const replacementElement = getReplacementElement();
+    replacementElement.value = initialMatchText;
 }
 
 export function applyFileList(files: IFileItem[]): void {

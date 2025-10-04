@@ -1,5 +1,5 @@
 import { applyIsDarkMode } from './dom-manipulations';
-import { applyFileList } from './files-table';
+import { applyFileList, applyInitialMatchText } from './files-table';
 import { getMatchPattern, getMatchType, getReplacement } from './form-controls';
 import { vsCodeApi } from './vs-code-api';
 
@@ -10,6 +10,10 @@ export function setupMessageListener() {
         console.log(`[From Host] message received of type = ${message.type}`);
 
         switch (message.type) {
+            case 'newInitialMatchText':
+                applyInitialMatchText(message.initialMatchText);
+                break;
+
             case 'newFileList':
                 applyFileList(message.files);
                 break;
@@ -21,6 +25,12 @@ export function setupMessageListener() {
             default:
                 break;
         }
+    });
+}
+
+export function getInitialMatchText() {
+    vsCodeApi.postMessage({
+        type: 'getInitialMatchText',
     });
 }
 

@@ -2,6 +2,7 @@ import { rename } from 'fs/promises';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { IFileItem } from '../../src-shared/models/models';
+import { longestCommonSubstring } from '../utils/string';
 import { startRenameView } from './start';
 
 // log all messages
@@ -52,6 +53,20 @@ export class ViewHost {
         return result;
     }
 
+    private buildAndSendInitialMatchText(): void {
+        const filenames = this.targetFiles.map((file) => {
+            const currentFileName = path.basename(file.fsPath);
+            return currentFileName;
+        });
+
+        const result = longestCommonSubstring(filenames);
+
+        this.panel.webview.postMessage({
+            type: 'newInitialMatchText',
+            initialMatchText: result,
+        });
+    }
+
     private buildAndSendFileList(
         matchType: string,
         matchPattern: string,
@@ -71,7 +86,7 @@ export class ViewHost {
     private sendIsDarkMode(): void {
         this.panel.webview.postMessage({
             type: 'sendIsDarkMode',
-            isDarkMode: this.isDarkMode
+            isDarkMode: this.isDarkMode,
         });
     }
 
@@ -118,6 +133,10 @@ export class ViewHost {
             switch (message.type) {
                 case 'getIsDarkMode':
                     this.sendIsDarkMode();
+                    return;
+
+                case 'getInitialMatchText':
+                    this.buildAndSendInitialMatchText();
                     return;
 
                 case 'getFileList':
